@@ -1,0 +1,12 @@
+**/.vs/
+**/bin/
+**/obj/
+**/node_modules/
+*.user
+.git/
+.vscode/
+docker-compose.override.yml
+*.log
+**/logs/
+.env
+*.env
