@@ -49,6 +49,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: log-service
+    ports:
+      - "1234:1234" # for prometheus scraping
     depends_on:
       rabbitmq:
         condition: service_healthy
