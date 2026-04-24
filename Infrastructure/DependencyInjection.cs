@@ -7,6 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Prometheus;
 
 namespace Infrastructure;
 
@@ -16,6 +17,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ILogRepository, LokiLogRepository>();
         services.AddScoped<ILogProcessor, ProcessLogEntry>();
+        services.AddLogging();
 
         // MassTransit + RabbitMQ
         services.AddMassTransit(x =>
@@ -33,6 +35,8 @@ public static class DependencyInjection
                     h.Username(username);
                     h.Password(password);
                 });
+
+                configurator.UsePrometheusMetrics(serviceName: "log-service");
 
                 configurator.ReceiveEndpoint("log-queue", e =>
                 {

@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Sinks.Loki;
+using Prometheus;
+using Microsoft.Extensions.Logging.Abstractions;
+using MassTransit;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -17,9 +20,11 @@ builder.Configuration
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
+    .MinimumLevel.Debug()
     .Enrich.FromLogContext()
     .Enrich.WithProperty("Service", "log-service")
+    .WriteTo.Console()
+    .WriteTo.LokiHttp(new NoAuthCredentials("http://loki:3100"))
     .CreateLogger();
 
 builder.Services.AddSingleton(Log.Logger);
@@ -27,6 +32,12 @@ builder.Services.AddSingleton(Log.Logger);
 builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
+
+builder.Services.AddMetricServer(options =>
+{
+    options.Port = 1234;
+    options.Hostname = "0.0.0.0";
+});
 
 var host = builder.Build();
 
